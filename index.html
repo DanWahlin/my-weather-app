@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WeatherView</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#forecast">Skip to forecast</a>
+    <header class="app-header">
+      <div class="header-content">
+        <div>
+          <p class="eyebrow">WeatherView</p>
+          <h1>5-day forecast</h1>
+        </div>
+        <nav class="controls" aria-label="Weather controls">
+          <form id="city-form" class="city-form" novalidate>
+            <label for="city-input" class="sr-only">City</label>
+            <input
+              id="city-input"
+              name="city"
+              type="text"
+              autocomplete="address-level2"
+              placeholder="Enter city"
+              required
+            />
+            <button type="submit">Search</button>
+          </form>
+          <button id="unit-toggle" class="control-button" type="button" aria-pressed="false">
+            <span aria-hidden="true">°C</span>
+            <span class="sr-only">Switch to Fahrenheit</span>
+          </button>
+          <button id="theme-toggle" class="control-button" type="button" aria-pressed="false">
+            <span aria-hidden="true">Light</span>
+            <span class="sr-only">Switch to dark theme</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="forecast" class="app-main" aria-busy="false">
+      <section class="status-panel" aria-live="polite" aria-atomic="true">
+        <p id="location-label" class="location-label"></p>
+        <p id="status-message" class="status-message">Ready.</p>
+        <button id="retry-button" class="retry-button" type="button" hidden>Retry</button>
+      </section>
+
+      <section aria-labelledby="forecast-heading">
+        <h2 id="forecast-heading">Forecast details</h2>
+        <div id="forecast-grid" class="forecast-grid"></div>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
