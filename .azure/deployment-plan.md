@@ -1,6 +1,6 @@
 # Deployment Plan — WeatherView
 
-**Status:** Validated
+**Status:** Deployed
 **Recipe:** AZCLI
 **Target:** Azure Static Web Apps (Free)
 
@@ -141,3 +141,50 @@ also calls `az group create` and offers a `--destroy` mode that deletes an entir
 group. To avoid any risk to other resources in the shared `Sandbox` group, deployment will
 invoke `az staticwebapp create` directly rather than running `deploy.sh`.
 
+
+## 8. Deployment Results
+
+**Status:** Deployed
+**Deployed:** 2026-07-27
+
+| Item | Value |
+|------|-------|
+| Resource | `swa-weatherview` (Microsoft.Web/staticSites) |
+| Resource group | `Sandbox` |
+| Location | `westus2` |
+| SKU | Free |
+| Live URL | https://mango-pebble-030acb21e.7.azurestaticapps.net |
+| Workflow | `.github/workflows/azure-static-web-apps-mango-pebble-030acb21e.yml` |
+
+### Issue encountered and resolved
+
+**First build failed.** Oryx detected `package.json` and auto-classified the repo as a
+Node.js app, then aborted:
+
+> `Error: Could not find either 'build' or 'build:azure' node under 'scripts' in package.json.`
+
+WeatherView has no build step — the browser loads the ES modules directly — so there is no
+`build` script to add. Setting `output_location: ""` alone does not suppress Oryx's build
+phase. **Fix:** added `skip_app_build: true` to the workflow's `Build And Deploy` step,
+which bypasses Oryx entirely and uploads the source as-is. Second run succeeded in 45s.
+
+### Post-deploy verification
+
+| Check | Result |
+|-------|--------|
+| `GET /` | 200, `text/html`, contains "WeatherView" |
+| `GET /app.js` | 200, `text/javascript` (correct ESM MIME type) |
+| `GET /weather-api.js` | 200, `text/javascript` |
+| `GET /styles.css` | 200, `text/css` |
+| `GET /WeatherView-Project-Overview.pptx` | 404 — correctly blocked |
+| `GET /tests/weather.spec.js` | 404 — correctly blocked |
+| Security headers | `nosniff`, `DENY`, `strict-origin-when-cross-origin` all present |
+
+**Live role verification:** N/A — no managed identity or RBAC role assignments provisioned.
+SWA authenticates deploys via a token stored as the GitHub Actions secret
+`AZURE_STATIC_WEB_APPS_API_TOKEN_MANGO_PEBBLE_030ACB21E`.
+
+### CI/CD
+
+Pushes to `main` now auto-deploy. Pull requests get staging preview environments
+automatically and are torn down on close.
